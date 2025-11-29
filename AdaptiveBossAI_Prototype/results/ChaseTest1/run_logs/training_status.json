@@ -1,0 +1,51 @@
+{
+    "EvaderBehavior": {
+        "checkpoints": [
+            {
+                "steps": 192,
+                "file_path": "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-192.onnx",
+                "reward": null,
+                "creation_time": 1764261049.7291095,
+                "auxillary_file_paths": [
+                    "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-192.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 192,
+            "file_path": "results\\ChaseTest1\\EvaderBehavior.onnx",
+            "reward": null,
+            "creation_time": 1764261049.7291095,
+            "auxillary_file_paths": [
+                "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-192.pt"
+            ]
+        }
+    },
+    "ChaserBehavior": {
+        "checkpoints": [
+            {
+                "steps": 192,
+                "file_path": "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-192.onnx",
+                "reward": null,
+                "creation_time": 1764261049.772323,
+                "auxillary_file_paths": [
+                    "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-192.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 192,
+            "file_path": "results\\ChaseTest1\\ChaserBehavior.onnx",
+            "reward": null,
+            "creation_time": 1764261049.772323,
+            "auxillary_file_paths": [
+                "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-192.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "1.13.1+cpu"
+    }
+}
