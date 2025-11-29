@@ -1,0 +1,14 @@
+# ML-Agents Python environment
+mlagents-env/
+
+# Unity generated folders (must be ignored)
+**/Library/
+**/Temp/
+**/Obj/
+**/Build/
+**/Builds/
+*.pidb
+*.booproj
+
+# Package Cache
+**/Library/PackageCache/
