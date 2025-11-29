@@ -2,6 +2,11 @@
 
 ## Complete Workflow (Start to Finish)
 
+### 0. Navigate to Project Directory
+```bash
+cd adaptive_ai_boss\AdaptiveBossAI_Prototype
+```
+
 ### 1. Activate Virtual Environment
 First, activate the mlagents-env virtual environment:
 
