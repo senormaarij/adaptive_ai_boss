@@ -7,6 +7,8 @@ public class SceneRotationData
 {
     public int totalEpisodes = 0;
     public int currentSceneIndex = 0;
+    public int chaserWins = 0;
+    public int evaderWins = 0;
 }
 
 public class SceneRotationManager : MonoBehaviour
@@ -191,6 +193,30 @@ public class SceneRotationManager : MonoBehaviour
     }
     
     /// <summary>
+    /// Track a chaser win
+    /// </summary>
+    public static void OnChaserWin()
+    {
+        if (instance != null)
+        {
+            instance.data.chaserWins++;
+            instance.SaveData();
+        }
+    }
+    
+    /// <summary>
+    /// Track an evader win
+    /// </summary>
+    public static void OnEvaderWin()
+    {
+        if (instance != null)
+        {
+            instance.data.evaderWins++;
+            instance.SaveData();
+        }
+    }
+    
+    /// <summary>
     /// Reset episode counter (useful for starting fresh training)
     /// </summary>
     public static void ResetEpisodeCount()
@@ -199,6 +225,8 @@ public class SceneRotationManager : MonoBehaviour
         {
             instance.data.totalEpisodes = 0;
             instance.data.currentSceneIndex = 0;
+            instance.data.chaserWins = 0;
+            instance.data.evaderWins = 0;
             instance.SaveData();
             Debug.Log("Scene Rotation: Episode count reset to 0");
         }
@@ -217,11 +245,13 @@ public class SceneRotationManager : MonoBehaviour
             string sceneName = sceneNames[data.currentSceneIndex];
             int episodesInCurrentScene = data.totalEpisodes % episodesPerScene;
             
-            GUI.Label(new Rect(5, 70, 400, 100), 
+            GUI.Label(new Rect(5, 70, 400, 140), 
                 $"Scene Rotation Manager\n" +
                 $"Total Episodes: {data.totalEpisodes}\n" +
                 $"Current Scene: {sceneName}\n" +
-                $"Episodes in Scene: {episodesInCurrentScene}/{episodesPerScene}", 
+                $"Episodes in Scene: {episodesInCurrentScene}/{episodesPerScene}\n" +
+                $"Total Chaser Wins: {data.chaserWins}\n" +
+                $"Total Evader Wins: {data.evaderWins}", 
                 style);
         }
     }

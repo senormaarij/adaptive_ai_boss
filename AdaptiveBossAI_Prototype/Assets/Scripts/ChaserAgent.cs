@@ -97,25 +97,6 @@ public class ChaserAgent : Agent
         if (evaderTransform != null)
         {
             // Direction to evader (normalized) - THE MOST IMPORTANT INFO
-            Vector2 toEvader = evaderTransform.position - transform.position;
-            float distance = toEvader.magnitude;
-            
-            if (distance > 0.01f)
-            {
-                Vector2 dirNormalized = toEvader / distance;
-                sensor.AddObservation(dirNormalized.x); // Direction X
-                sensor.AddObservation(dirNormalized.y); // Direction Y
-            }
-            else
-            {
-                sensor.AddObservation(0f);
-                sensor.AddObservation(0f);
-            }
-            
-            // Distance (normalized)
-            sensor.AddObservation(distance / arenaSize);
-            
-            // My velocity (normalized)
             sensor.AddObservation(rb.linearVelocity.x / maxSpeed);
             sensor.AddObservation(rb.linearVelocity.y / maxSpeed);
             
@@ -277,8 +258,9 @@ public class ChaserAgent : Agent
             float timeBonus = (1f - episodeTimer / maxEpisodeTime) * 10.0f;
             AddReward(timeBonus);
             
+            SceneRotationManager.OnChaserWin(); // Track win persistently
             if (uiManager != null)
-                uiManager.OnChaserWin();
+                uiManager.OnChaserWin(); // Update current scene UI
             
             SceneRotationManager.OnEpisodeEnd(); // Track episode completion
             EndEpisode();

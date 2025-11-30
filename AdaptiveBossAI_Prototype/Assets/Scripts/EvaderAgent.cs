@@ -94,6 +94,13 @@ public class EvaderAgent : Agent
     
     public override void CollectObservations(VectorSensor sensor)
     {
+        // Safety check - ensure components are initialized
+        if (rb == null)
+        {
+            rb = GetComponent<Rigidbody2D>();
+            if (rb == null) return; // Still null, skip this observation cycle
+        }
+        
         // Evader's normalized position (2)
         sensor.AddObservation(transform.localPosition.x / arenaSize);
         sensor.AddObservation(transform.localPosition.y / arenaSize);
@@ -157,7 +164,9 @@ public class EvaderAgent : Agent
         if (episodeTimer >= maxEpisodeTime)
         {
             AddReward(15.0f); // MASSIVE reward for surviving
-                uiManager.OnEvaderWin();
+            SceneRotationManager.OnEvaderWin(); // Track win persistently
+            if (uiManager != null)
+                uiManager.OnEvaderWin(); // Update current scene UI
             EndEpisode();
             return;
         }
