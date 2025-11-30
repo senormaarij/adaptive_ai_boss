@@ -37,7 +37,7 @@ public class ChaserAgent : Agent
     // Stun mechanic for wall collisions
     private bool isStunned = false;
     private float stunTimer = 0f;
-    private const float stunDuration = 0.2f; // Reduced from 5.0f - agent needs quick feedback!
+    private const float stunDuration = 5.0f;
     
     void Start()
     {
@@ -56,6 +56,9 @@ public class ChaserAgent : Agent
     
     public override void OnEpisodeBegin()
     {
+        // Track episode for scene rotation
+        SceneRotationManager.OnEpisodeEnd();
+
         episodeTimer = 0f;
         
         // Random spawn
@@ -145,7 +148,7 @@ public class ChaserAgent : Agent
             return;
         }
         
-        // Update stun timer - EXIT BEFORE ANY REWARDS
+        // Update stun timer
         if (isStunned)
         {
             stunTimer -= Time.fixedDeltaTime;
@@ -153,7 +156,7 @@ public class ChaserAgent : Agent
             {
                 isStunned = false;
             }
-            return; // EXIT - No movement, no rewards during stun
+            return; // Skip movement while stunned
         }
         
         // Apply force for smooth movement
@@ -277,8 +280,8 @@ public class ChaserAgent : Agent
     {
         if (other.TryGetComponent<Wall>(out Wall wall) || other.TryGetComponent<House>(out House house))
         {
-            // Penalty for hitting wall - increased to make it hurt more
-            AddReward(-10.0f);
+            // Penalty for hitting wall
+            AddReward(-2.0f);
             Debug.Log("Chaser hit wall - bouncing back");
             
             // Bounce back - reverse velocity

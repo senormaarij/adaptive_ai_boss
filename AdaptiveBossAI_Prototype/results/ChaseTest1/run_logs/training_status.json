@@ -2,44 +2,44 @@
     "EvaderBehavior": {
         "checkpoints": [
             {
-                "steps": 192,
-                "file_path": "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-192.onnx",
+                "steps": 320,
+                "file_path": "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-320.onnx",
                 "reward": null,
-                "creation_time": 1764261049.7291095,
+                "creation_time": 1764484659.5010395,
                 "auxillary_file_paths": [
-                    "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-192.pt"
+                    "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-320.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 192,
+            "steps": 320,
             "file_path": "results\\ChaseTest1\\EvaderBehavior.onnx",
             "reward": null,
-            "creation_time": 1764261049.7291095,
+            "creation_time": 1764484659.5010395,
             "auxillary_file_paths": [
-                "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-192.pt"
+                "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-320.pt"
             ]
         }
     },
     "ChaserBehavior": {
         "checkpoints": [
             {
-                "steps": 192,
-                "file_path": "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-192.onnx",
+                "steps": 320,
+                "file_path": "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-320.onnx",
                 "reward": null,
-                "creation_time": 1764261049.772323,
+                "creation_time": 1764484659.5610013,
                 "auxillary_file_paths": [
-                    "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-192.pt"
+                    "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-320.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 192,
+            "steps": 320,
             "file_path": "results\\ChaseTest1\\ChaserBehavior.onnx",
             "reward": null,
-            "creation_time": 1764261049.772323,
+            "creation_time": 1764484659.5610013,
             "auxillary_file_paths": [
-                "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-192.pt"
+                "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-320.pt"
             ]
         }
     },
