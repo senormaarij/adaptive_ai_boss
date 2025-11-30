@@ -141,7 +141,7 @@ public class ChaserAgent : Agent
     {
         episodeTimer += Time.fixedDeltaTime;
         
-        // Time limit - chaser failed
+        //Time limit - chaser failed
         if (episodeTimer >= maxEpisodeTime)
         {
             AddReward(-10.0f);
@@ -258,9 +258,6 @@ public class ChaserAgent : Agent
                 spriteRenderer.sprite = spriteDown;  // Down
         }
     }
-    
-    // DELETE your old OnCollisionEnter2D and OnTriggerEnter2D
-    // PASTE these two methods in their place:
 
     void OnCollisionEnter2D(Collision2D collision)
     {
