@@ -1,0 +1,27 @@
+# ML-Agents and core dependencies
+mlagents==1.1.0
+mlagents-envs==1.1.0
+
+# PyTorch - compatible version for mlagents 1.1.0
+torch==1.13.1
+torchvision==0.14.1
+
+# ONNX - required by mlagents
+onnx==1.15.0
+
+# Protobuf - compatible version for mlagents
+protobuf==3.20.3
+
+# NumPy - compatible version for mlagents
+numpy==1.23.5
+
+# Other dependencies required by mlagents
+grpcio==1.48.2
+h5py==3.7.0
+Pillow==9.3.0
+pyyaml==6.0
+tensorboard==2.11.0
+attrs==21.2.0
+pypiwin32==223
+gym==0.21.0
+pettingzoo==1.15.0
