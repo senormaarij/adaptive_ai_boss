@@ -9,6 +9,28 @@ mlagents-env/
 **/Builds/
 *.pidb
 *.booproj
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+
+# Unity Recovery folder
+_Recovery/
+#never ignore meta files crucial for unity
+results/
+summaries/
+timers/
+
+!*.meta
 
 # Package Cache
 **/Library/PackageCache/

@@ -92,36 +92,50 @@ public class ChaserAgent : Agent
         stunTimer = 0f;
     }
     
-    public override void CollectObservations(VectorSensor sensor)
-    {
-        if (evaderTransform != null)
+        public override void CollectObservations(VectorSensor sensor)
         {
-            // Direction to evader (normalized) - THE MOST IMPORTANT INFO
-            sensor.AddObservation(rb.linearVelocity.x / maxSpeed);
-            sensor.AddObservation(rb.linearVelocity.y / maxSpeed);
-            
-            // Evader's velocity (to predict where they're going)
-            Rigidbody2D evaderRb = evaderTransform.GetComponent<Rigidbody2D>();
-            if (evaderRb != null)
+            // Check if we have a target
+            if (evaderTransform != null)
             {
-                float evaderSpeed = evaderAgent != null ? evaderAgent.moveSpeed : maxSpeed;
-                sensor.AddObservation(evaderRb.linearVelocity.x / evaderSpeed);
-                sensor.AddObservation(evaderRb.linearVelocity.y / evaderSpeed);
+                // 1. OBSERVE: Where is the Evader? (This was missing!)
+                // We give the direction vector pointing to the evader
+                Vector2 directionToEvader = (evaderTransform.position - transform.position).normalized;
+                sensor.AddObservation(directionToEvader.x);
+                sensor.AddObservation(directionToEvader.y);
+
+                // 2. OBSERVE: Distance to Evader (Helps it know when to lunge)
+                float distance = Vector2.Distance(transform.position, evaderTransform.position);
+                sensor.AddObservation(distance / arenaSize); // Normalize by arena size
+
+                // 3. OBSERVE: My Velocity (Am I moving?)
+                sensor.AddObservation(rb.linearVelocity.x / maxSpeed);
+                sensor.AddObservation(rb.linearVelocity.y / maxSpeed);
+                
+                // 4. OBSERVE: Evader's Velocity (Where are they going?)
+                Rigidbody2D evaderRb = evaderTransform.GetComponent<Rigidbody2D>();
+                if (evaderRb != null)
+                {
+                    float evaderSpeed = evaderAgent != null ? evaderAgent.moveSpeed : maxSpeed;
+                    sensor.AddObservation(evaderRb.linearVelocity.x / evaderSpeed);
+                    sensor.AddObservation(evaderRb.linearVelocity.y / evaderSpeed);
+                }
+                else
+                {
+                    sensor.AddObservation(0f);
+                    sensor.AddObservation(0f);
+                }
             }
             else
             {
-                sensor.AddObservation(0f);
-                sensor.AddObservation(0f);
+                // If target is missing, fill with zeros to prevent errors
+                sensor.AddObservation(Vector2.zero); // Direction
+                sensor.AddObservation(0f);           // Distance
+                sensor.AddObservation(Vector2.zero); // My Vel
+                sensor.AddObservation(Vector2.zero); // Target Vel
             }
+            
+            // TOTAL OBSERVATIONS: 2 (Dir) + 1 (Dist) + 2 (MyVel) + 2 (TgtVel) = 7
         }
-        else
-        {
-            for (int i = 0; i < 7; i++)
-                sensor.AddObservation(0f);
-        }
-        
-        // Total: 7 simple observations
-    }
     
     public override void OnActionReceived(ActionBuffers actions)
     {
@@ -245,44 +259,55 @@ public class ChaserAgent : Agent
         }
     }
     
+    // DELETE your old OnCollisionEnter2D and OnTriggerEnter2D
+    // PASTE these two methods in their place:
+
     void OnCollisionEnter2D(Collision2D collision)
     {
+        // 1. Logic for WINNING (Catching the Evader)
         if (collision.gameObject.CompareTag("Evader"))
         {
             Debug.Log("CHASER WON!");
-            
-            // MASSIVE SUCCESS REWARD
             AddReward(20.0f);
             
-            // Bonus for speed
             float timeBonus = (1f - episodeTimer / maxEpisodeTime) * 10.0f;
             AddReward(timeBonus);
             
-            SceneRotationManager.OnChaserWin(); // Track win persistently
-            if (uiManager != null)
-                uiManager.OnChaserWin(); // Update current scene UI
+            SceneRotationManager.OnChaserWin();
+            if (uiManager != null) uiManager.OnChaserWin();
             
-            SceneRotationManager.OnEpisodeEnd(); // Track episode completion
+            SceneRotationManager.OnEpisodeEnd();
             EndEpisode();
-            if (evaderAgent != null)
-                evaderAgent.EndEpisode();
+            if (evaderAgent != null) evaderAgent.EndEpisode();
+            return;
+        }
+
+        // 2. Logic for HITTING WALLS (Tag is "Collider" based on your screenshot)
+        if (collision.gameObject.CompareTag("Collider") || collision.gameObject.CompareTag("Wall")) 
+        {
+            AddReward(-2.0f); // Penalty
+            
+            // Stun logic
+            isStunned = true;
+            stunTimer = 1.0f; // 1 second stun
+            
+            // Physical Bounce
+            if (rb != null)
+            {
+                // Stop momentum
+                rb.linearVelocity = Vector2.zero; 
+                // Push back slightly based on collision normal
+                rb.AddForce(collision.contacts[0].normal * 10f, ForceMode2D.Impulse);
+            }
         }
     }
-    
-    private void OnTriggerEnter2D(Collider2D other)
+
+    void OnCollisionStay2D(Collision2D collision)
     {
-        if (other.TryGetComponent<Wall>(out Wall wall) || other.TryGetComponent<House>(out House house))
+        // Punish for hugging the wall
+        if (collision.gameObject.CompareTag("Collider") || collision.gameObject.CompareTag("Wall")) 
         {
-            // Penalty for hitting wall
-            AddReward(-2.0f);
-            Debug.Log("Chaser hit wall - bouncing back");
-            
-            // Bounce back - reverse velocity
-            rb.linearVelocity = -rb.linearVelocity * 0.5f; // Bounce with 50% dampening
-            
-            // Apply stun
-            isStunned = true;
-            stunTimer = stunDuration;
+            AddReward(-1.0f); 
         }
     }
     

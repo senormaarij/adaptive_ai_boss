@@ -160,101 +160,62 @@ public class EvaderAgent : Agent
     {
         episodeTimer += Time.fixedDeltaTime;
         
-        // Survived the time limit - BIG WIN
+        // 1. SURVIVAL REWARD (The most important one)
+        // Give a small positive reward every frame just for being alive.
+        // This encourages prolonging the game as long as possible.
+        AddReward(0.01f); 
+
+        // Time limit reached - BIG WIN
         if (episodeTimer >= maxEpisodeTime)
         {
-            AddReward(15.0f); // MASSIVE reward for surviving
-            SceneRotationManager.OnEvaderWin(); // Track win persistently
-            if (uiManager != null)
-                uiManager.OnEvaderWin(); // Update current scene UI
+            AddReward(10.0f); // Bonus for making it to the end
+            SceneRotationManager.OnEvaderWin();
+            if (uiManager != null) uiManager.OnEvaderWin();
             EndEpisode();
             return;
         }
         
-        // Update stun timer
+        // Stun logic (Keep existing)
         if (isStunned)
         {
             stunTimer -= Time.fixedDeltaTime;
-            if (stunTimer <= 0f)
-            {
-                isStunned = false;
-            }
-            return; // Skip movement while stunned
+            if (stunTimer <= 0f) isStunned = false;
+            return;
         }
         
-        // Smooth movement with acceleration
+        // Movement Logic (Keep existing)
         float moveX = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
         float moveY = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
-        
         Vector2 inputDir = new Vector2(moveX, moveY);
         Vector2 targetVelocity = inputDir.normalized * moveSpeed * inputDir.magnitude;
-        
-        // Smooth acceleration using lerp
         rb.linearVelocity = Vector2.Lerp(rb.linearVelocity, targetVelocity, acceleration * Time.fixedDeltaTime);
         
+        // 2. INTELLIGENT EVASION REWARDS
         if (chaserTransform != null)
         {
             float currentDistance = Vector2.Distance(transform.position, chaserTransform.position);
             
-            // AGGRESSIVE DISTANCE-BASED REWARDS
-            // Reward for increasing distance from chaser
+            // REWARD 1: Moving Away (The "Run!" instinct)
+            // Instead of punishing proximity, we REWARD increasing the distance.
             if (lastDistanceToChaser > 0)
             {
                 float distanceChange = currentDistance - lastDistanceToChaser;
-                if (distanceChange > 0) // Getting farther - GOOD!
+                // If we moved away, give a nice reward.
+                // If we got closer, give a SMALL penalty (don't discourage movement).
+                if (distanceChange > 0)
                 {
-                    AddReward(distanceChange * 0.4f); // Strong reward for escaping
-                }
-                else // Getting closer - BAD!
-                {
-                    AddReward(distanceChange * 0.5f); // Strong penalty for letting chaser close in
+                    AddReward(distanceChange * 1.0f); // Strong reward for creating a gap
                 }
             }
             lastDistanceToChaser = currentDistance;
             
-            // Distance-based rewards (exponentially stronger when in danger)
-            if (currentDistance < 2f)
+            // REWARD 2: "Juking" Bonus
+            // If the Chaser is very close, but the Evader is moving FAST, reward it.
+            // This teaches it to sprint when in danger, rather than freeze.
+            if (currentDistance < 3f && rb.linearVelocity.magnitude > 2f)
             {
-                AddReward(-0.15f); // DANGER ZONE - massive penalty
+                AddReward(0.005f); 
             }
-            else if (currentDistance < 3.5f)
-            {
-                AddReward(-0.05f); // Close - big penalty
-            }
-            else if (currentDistance < 5f)
-            {
-                AddReward(-0.01f); // Medium range - small penalty
-            }
-            else if (currentDistance > 6f)
-            {
-                AddReward(0.02f); // Safe distance - reward
-            }
-            else if (currentDistance > 8f)
-            {
-                AddReward(0.04f); // Very safe - bigger reward
-            }
-            
-            // Velocity alignment reward - reward for moving away from chaser
-            Vector2 dirAwayFromChaser = (transform.position - chaserTransform.position).normalized;
-            float velocityAlignment = Vector2.Dot(rb.linearVelocity.normalized, dirAwayFromChaser);
-            AddReward(velocityAlignment * 0.015f); // Reward for moving away
-            
-            // Bonus for maintaining high speed when being chased
-            if (currentDistance < 5f)
-            {
-                float speedRatio = rb.linearVelocity.magnitude / moveSpeed;
-                AddReward(speedRatio * 0.005f); // Reward for moving fast when in danger
-            }
-        }
-        
-        // Survival time reward (incremental reward for each step survived)
-        AddReward(0.001f); // Small reward just for surviving
-        
-        // Small action smoothness reward
-        float actionMagnitude = inputDir.magnitude;
-        if (actionMagnitude > 0.1f)
-        {
-            AddReward(0.0001f); // Tiny reward for taking action
         }
         
         UpdateSpriteDirection();
@@ -310,34 +271,42 @@ public class EvaderAgent : Agent
         }
     }
     
+    // DELETE your old OnCollisionEnter2D and OnTriggerEnter2D
+    // PASTE these two methods in their place:
+
     void OnCollisionEnter2D(Collision2D collision)
     {
+        // 1. Logic for LOSING (Caught by Chaser)
         if (collision.gameObject.CompareTag("Chaser"))
         {
             Debug.Log("Evader caught by chaser!");
-            
-            // MASSIVE penalty for being caught
             AddReward(-15.0f);
-            
-            
             EndEpisode();
+            return;
+        }
+
+        // 2. Logic for HITTING WALLS (Tag is "Collider" based on your screenshot)
+        if (collision.gameObject.CompareTag("Collider") || collision.gameObject.CompareTag("Wall")) 
+        {
+            AddReward(-1.0f); // Penalty
+            
+            isStunned = true;
+            stunTimer = 1.0f;
+            
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero; 
+                rb.AddForce(collision.contacts[0].normal * 10f, ForceMode2D.Impulse);
+            }
         }
     }
     
-    private void OnTriggerEnter2D(Collider2D other)
+    void OnCollisionStay2D(Collision2D collision)
     {
-        if (other.TryGetComponent<Wall>(out Wall wall) || other.TryGetComponent<House>(out House house))
+        // Punish for hugging the wall
+        if (collision.gameObject.CompareTag("Collider") || collision.gameObject.CompareTag("Wall")) 
         {
-            // Penalty for hitting wall
-            AddReward(wallCollisionPenalty);
-            Debug.Log("Evader hit wall - bouncing back");
-            
-            // Bounce back - reverse velocity
-            rb.linearVelocity = -rb.linearVelocity * 0.5f; // Bounce with 50% dampening
-            
-            // Apply stun
-            isStunned = true;
-            stunTimer = stunDuration;
+            AddReward(-1.0f); 
         }
     }
     
