@@ -37,7 +37,7 @@ public class ChaserAgent : Agent
     // Stun mechanic for wall collisions
     private bool isStunned = false;
     private float stunTimer = 0f;
-    private const float stunDuration = 5.0f;
+    private const float stunDuration = 2.0f;
     
     void Start()
     {
@@ -56,9 +56,19 @@ public class ChaserAgent : Agent
     
     public override void OnEpisodeBegin()
     {
-        // Track episode for scene rotation
-        SceneRotationManager.OnEpisodeEnd();
-
+        // Initialize components if not already done
+        if (rb == null)
+        {
+            rb = GetComponent<Rigidbody2D>();
+            spriteRenderer = GetComponent<SpriteRenderer>();
+        }
+        
+        // Capture initial position if not set
+        if (startPosition == Vector3.zero)
+        {
+            startPosition = transform.position;
+        }
+        
         episodeTimer = 0f;
         
         // Random spawn
@@ -140,8 +150,8 @@ public class ChaserAgent : Agent
         if (episodeTimer >= maxEpisodeTime)
         {
             AddReward(-10.0f);
-            if (uiManager != null)
-                uiManager.OnEvaderWin();
+            // Note: EvaderAgent handles the UI update
+            SceneRotationManager.OnEpisodeEnd(); // Track episode completion
             EndEpisode();
             if (evaderAgent != null)
                 evaderAgent.EndEpisode();
@@ -270,6 +280,7 @@ public class ChaserAgent : Agent
             if (uiManager != null)
                 uiManager.OnChaserWin();
             
+            SceneRotationManager.OnEpisodeEnd(); // Track episode completion
             EndEpisode();
             if (evaderAgent != null)
                 evaderAgent.EndEpisode();

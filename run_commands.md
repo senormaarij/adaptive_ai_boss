@@ -77,3 +77,8 @@ Then open http://localhost:6006 in your browser.
 - **Results**: `results/[run-id]/`
 - **ONNX models**: `models/` (or wherever you export them)
 - **Unity models**: Place `.onnx` files in `AdaptiveBossAI_Prototype/Assets/` for use in Unity
+
+### Command to reset episode counter
+```PowerShell
+Remove-Item "$env:USERPROFILE\AppData\LocalLow\DefaultCompany\*\SceneRotationData.json" -Force
+```

@@ -2,44 +2,44 @@
     "EvaderBehavior": {
         "checkpoints": [
             {
-                "steps": 320,
-                "file_path": "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-320.onnx",
-                "reward": null,
-                "creation_time": 1764484659.5010395,
+                "steps": 69029,
+                "file_path": "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-69029.onnx",
+                "reward": 18.786996309955914,
+                "creation_time": 1764489559.6503909,
                 "auxillary_file_paths": [
-                    "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-320.pt"
+                    "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-69029.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 320,
+            "steps": 69029,
             "file_path": "results\\ChaseTest1\\EvaderBehavior.onnx",
-            "reward": null,
-            "creation_time": 1764484659.5010395,
+            "reward": 18.786996309955914,
+            "creation_time": 1764489559.6503909,
             "auxillary_file_paths": [
-                "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-320.pt"
+                "results\\ChaseTest1\\EvaderBehavior\\EvaderBehavior-69029.pt"
             ]
         }
     },
     "ChaserBehavior": {
         "checkpoints": [
             {
-                "steps": 320,
-                "file_path": "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-320.onnx",
-                "reward": null,
-                "creation_time": 1764484659.5610013,
+                "steps": 69029,
+                "file_path": "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-69029.onnx",
+                "reward": -160.30209787686667,
+                "creation_time": 1764489559.6976216,
                 "auxillary_file_paths": [
-                    "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-320.pt"
+                    "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-69029.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 320,
+            "steps": 69029,
             "file_path": "results\\ChaseTest1\\ChaserBehavior.onnx",
-            "reward": null,
-            "creation_time": 1764484659.5610013,
+            "reward": -160.30209787686667,
+            "creation_time": 1764489559.6976216,
             "auxillary_file_paths": [
-                "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-320.pt"
+                "results\\ChaseTest1\\ChaserBehavior\\ChaserBehavior-69029.pt"
             ]
         }
     },

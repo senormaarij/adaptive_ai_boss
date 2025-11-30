@@ -39,7 +39,7 @@ public class EvaderAgent : Agent
     // Stun mechanic for wall collisions
     private bool isStunned = false;
     private float stunTimer = 0f;
-    private const float stunDuration = 2.0f;
+    private const float stunDuration = 5.0f;
     
     void Start()
     {
@@ -70,14 +70,8 @@ public class EvaderAgent : Agent
         {
             rb = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
-        }
-        
-        // Capture initial position if not set
-        if (startPosition == Vector3.zero)
-        {
             startPosition = transform.position;
         }
-        
         episodeTimer = 0f;
         lastDistanceToChaser = 0f;
         
@@ -157,6 +151,7 @@ public class EvaderAgent : Agent
         if (episodeTimer >= maxEpisodeTime)
         {
             AddReward(15.0f); // MASSIVE reward for surviving
+            if (uiManager != null)
                 uiManager.OnEvaderWin();
             EndEpisode();
             return;
@@ -296,29 +291,6 @@ public class EvaderAgent : Agent
             // Moving more vertically
             if (velocity.y > 0 && spriteUp != null)
                 spriteRenderer.sprite = spriteUp;    // Up
-            else if (velocity.y < 0 && spriteDown != null)
-                spriteRenderer.sprite = spriteDown;  // Down
-        }
-    }
-    
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Chaser"))
-        {
-            Debug.Log("Evader caught by chaser!");
-            
-            // MASSIVE penalty for being caught
-            AddReward(-15.0f);
-            
-            
-            EndEpisode();
-        }
-    }
-    
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.TryGetComponent<Wall>(out Wall wall) || other.TryGetComponent<House>(out House house))
-        {
             // Penalty for hitting wall
             AddReward(wallCollisionPenalty);
             Debug.Log("Evader hit wall - bouncing back");

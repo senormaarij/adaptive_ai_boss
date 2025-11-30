@@ -217,7 +217,7 @@ public class SceneRotationManager : MonoBehaviour
             string sceneName = sceneNames[data.currentSceneIndex];
             int episodesInCurrentScene = data.totalEpisodes % episodesPerScene;
             
-            GUI.Label(new Rect(10, 70, 400, 100), 
+            GUI.Label(new Rect(5, 70, 400, 100), 
                 $"Scene Rotation Manager\n" +
                 $"Total Episodes: {data.totalEpisodes}\n" +
                 $"Current Scene: {sceneName}\n" +
