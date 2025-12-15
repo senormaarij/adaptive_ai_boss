@@ -54,6 +54,19 @@ public class ChaserAgent : Agent
         rb.gravityScale = 0f;
     }
     
+    // Spawn points - both agents will use these
+    private static readonly Vector2[] spawnPoints = new Vector2[]
+    {
+        new Vector2(-0.01f, 6f),
+        new Vector2(-0.01f, 13.71f),
+        new Vector2(0.02160004f, -3.5367f),
+        new Vector2(0.02160004f, -13.83f)
+    };
+    
+    // Track last spawn to avoid repetition
+    private static int lastChaserSpawn = -1;
+    private static int lastEvaderSpawn = -1;
+    
     public override void OnEpisodeBegin()
     {
         // Initialize components if not already done
@@ -63,16 +76,35 @@ public class ChaserAgent : Agent
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
         
-        // Capture initial position if not set
-        if (startPosition == Vector3.zero)
-        {
-            startPosition = transform.position;
-        }
-        
         episodeTimer = 0f;
         
-        // Random spawn
-        transform.position = startPosition;
+        // Create a shuffled list of indices for fair distribution
+        System.Collections.Generic.List<int> availableIndices = new System.Collections.Generic.List<int> { 0, 1, 2, 3 };
+        
+        // Remove last used indices to prevent same spawn twice in a row
+        if (lastChaserSpawn >= 0 && availableIndices.Count > 2)
+            availableIndices.Remove(lastChaserSpawn);
+        
+        // Pick chaser spawn
+        int chaserIndex = availableIndices[Random.Range(0, availableIndices.Count)];
+        availableIndices.Remove(chaserIndex);
+        
+        // Pick evader spawn from remaining
+        int evaderIndex = availableIndices[Random.Range(0, availableIndices.Count)];
+        
+        // Store for next episode
+        lastChaserSpawn = chaserIndex;
+        lastEvaderSpawn = evaderIndex;
+        
+        // Apply positions
+        Vector3 newPos = new Vector3(spawnPoints[chaserIndex].x, spawnPoints[chaserIndex].y, transform.position.z);
+        transform.position = newPos;
+        
+        if (evaderTransform != null)
+        {
+            Vector3 evaderPos = new Vector3(spawnPoints[evaderIndex].x, spawnPoints[evaderIndex].y, evaderTransform.position.z);
+            evaderTransform.position = evaderPos;
+        }
         
         rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;
@@ -108,8 +140,16 @@ public class ChaserAgent : Agent
                 sensor.AddObservation(distance / arenaSize); // Normalize by arena size
 
                 // 3. OBSERVE: My Velocity (Am I moving?)
-                sensor.AddObservation(rb.linearVelocity.x / maxSpeed);
-                sensor.AddObservation(rb.linearVelocity.y / maxSpeed);
+                if (rb != null)
+                {
+                    sensor.AddObservation(rb.linearVelocity.x / maxSpeed);
+                    sensor.AddObservation(rb.linearVelocity.y / maxSpeed);
+                }
+                else
+                {
+                    sensor.AddObservation(0f);
+                    sensor.AddObservation(0f);
+                }
                 
                 // 4. OBSERVE: Evader's Velocity (Where are they going?)
                 Rigidbody2D evaderRb = evaderTransform.GetComponent<Rigidbody2D>();
@@ -280,13 +320,13 @@ public class ChaserAgent : Agent
         }
 
         // 2. Logic for HITTING WALLS (Tag is "Collider" based on your screenshot)
-        if (collision.gameObject.CompareTag("Collider") || collision.gameObject.CompareTag("Wall")) 
+        if (collision.gameObject.CompareTag("Collider")) 
         {
-            AddReward(-2.0f); // Penalty
+            AddReward(-10.0f); // Heavy penalty to prevent oscillation loops
             
             // Stun logic
             isStunned = true;
-            stunTimer = 1.0f; // 1 second stun
+            stunTimer = 2.0f; // 2 second stun
             
             // Physical Bounce
             if (rb != null)
@@ -294,7 +334,7 @@ public class ChaserAgent : Agent
                 // Stop momentum
                 rb.linearVelocity = Vector2.zero; 
                 // Push back slightly based on collision normal
-                rb.AddForce(collision.contacts[0].normal * 10f, ForceMode2D.Impulse);
+                rb.AddForce(collision.contacts[0].normal * 3f, ForceMode2D.Impulse);
             }
         }
     }
@@ -302,9 +342,9 @@ public class ChaserAgent : Agent
     void OnCollisionStay2D(Collision2D collision)
     {
         // Punish for hugging the wall
-        if (collision.gameObject.CompareTag("Collider") || collision.gameObject.CompareTag("Wall")) 
+        if (collision.gameObject.CompareTag("Collider")) 
         {
-            AddReward(-1.0f); 
+            AddReward(-2.0f); // Doubled penalty for wall hugging 
         }
     }
     

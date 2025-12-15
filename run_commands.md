@@ -82,3 +82,10 @@ Then open http://localhost:6006 in your browser.
 ```PowerShell
 Remove-Item "$env:USERPROFILE\AppData\LocalLow\DefaultCompany\*\SceneRotationData.json" -Force
 ```
+
+### FOR ME
+
+Remove-Item "$env:USERPROFILE\AppData\LocalLow\DefaultCompany\*\SceneRotationData.json" -Force
+cd .\AdaptiveBossAI_Prototype\                    
+mlagents-env\Scripts\activate
+mlagents-learn chase_config.yaml --run-id=ChaseTest8 --force

@@ -15,6 +15,20 @@ public class SceneRotationManager : MonoBehaviour
 {
     private static SceneRotationManager instance;
     
+    public enum RotationMode
+    {
+        Progressive,  // Normal: rotate through scenes based on episodes
+        FixedScene    // Locked: stay on a single selected scene
+    }
+    
+    [Header("Mode Selection")]
+    [Tooltip("Progressive = rotate scenes normally. FixedScene = stay on selected scene forever.")]
+    public RotationMode mode = RotationMode.FixedScene;
+    
+    [Tooltip("When mode is FixedScene, which scene index to lock on (0 = Scene 1, 5 = Scene Last)")]
+    [Range(0, 5)]
+    public int fixedSceneIndex = 2;
+    
     [Header("Scene Rotation Settings")]
     [Tooltip("Number of episodes before switching to the next scene")]
     public int episodesPerScene = 200;
@@ -95,8 +109,19 @@ public class SceneRotationManager : MonoBehaviour
     
     private void LoadCorrectScene()
     {
-        // Calculate which scene should be active based on total episodes
-        int targetSceneIndex = Mathf.Min(data.totalEpisodes / episodesPerScene, sceneNames.Length - 1);
+        int targetSceneIndex;
+        
+        if (mode == RotationMode.FixedScene)
+        {
+            // Fixed mode: always use the selected scene
+            targetSceneIndex = Mathf.Clamp(fixedSceneIndex, 0, sceneNames.Length - 1);
+            Debug.Log($"Scene Rotation: FIXED MODE - Locking to scene index {targetSceneIndex}");
+        }
+        else
+        {
+            // Progressive mode: calculate based on total episodes
+            targetSceneIndex = Mathf.Min(data.totalEpisodes / episodesPerScene, sceneNames.Length - 1);
+        }
         
         // Update current scene index
         data.currentSceneIndex = targetSceneIndex;
@@ -133,11 +158,15 @@ public class SceneRotationManager : MonoBehaviour
         
         instance.data.totalEpisodes++;
         
-        // Check if we need to switch scenes
-        int newSceneIndex = Mathf.Min(instance.data.totalEpisodes / instance.episodesPerScene, instance.sceneNames.Length - 1);
-        
         // Save data after every episode
         instance.SaveData();
+        
+        // In FixedScene mode, never switch scenes
+        if (instance.mode == RotationMode.FixedScene)
+            return;
+        
+        // Progressive mode: Check if we need to switch scenes
+        int newSceneIndex = Mathf.Min(instance.data.totalEpisodes / instance.episodesPerScene, instance.sceneNames.Length - 1);
         
         // Switch scene if needed
         if (newSceneIndex != instance.data.currentSceneIndex)
@@ -238,7 +267,7 @@ public class SceneRotationManager : MonoBehaviour
         if (data != null)
         {
             GUIStyle style = new GUIStyle();
-            style.fontSize = 14;
+            style.fontSize = 28;
             style.normal.textColor = Color.yellow;
             style.padding = new RectOffset(10, 10, 10, 10);
             

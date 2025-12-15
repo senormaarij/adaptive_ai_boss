@@ -72,21 +72,15 @@ public class EvaderAgent : Agent
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
         
-        // Capture initial position if not set
-        if (startPosition == Vector3.zero)
-        {
-            startPosition = transform.position;
-        }
-        
         episodeTimer = 0f;
         lastDistanceToChaser = 0f;
         
-        transform.position = startPosition;
+        // Note: ChaserAgent handles spawn positioning for both agents
+        // Just reset velocity and stun state here
         
         rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;
         
-
         // Reset stun state
         isStunned = false;
         stunTimer = 0f;
@@ -286,17 +280,17 @@ public class EvaderAgent : Agent
         }
 
         // 2. Logic for HITTING WALLS (Tag is "Collider" based on your screenshot)
-        if (collision.gameObject.CompareTag("Collider") || collision.gameObject.CompareTag("Wall")) 
+        if (collision.gameObject.CompareTag("Collider")) 
         {
-            AddReward(-1.0f); // Penalty
+            AddReward(-10.0f); // Heavy penalty to prevent oscillation loops
             
             isStunned = true;
-            stunTimer = 1.0f;
+            stunTimer = 2.0f; // 2 second stun
             
             if (rb != null)
             {
                 rb.linearVelocity = Vector2.zero; 
-                rb.AddForce(collision.contacts[0].normal * 10f, ForceMode2D.Impulse);
+                rb.AddForce(collision.contacts[0].normal * 3f, ForceMode2D.Impulse);
             }
         }
     }
@@ -304,9 +298,9 @@ public class EvaderAgent : Agent
     void OnCollisionStay2D(Collision2D collision)
     {
         // Punish for hugging the wall
-        if (collision.gameObject.CompareTag("Collider") || collision.gameObject.CompareTag("Wall")) 
+        if (collision.gameObject.CompareTag("Collider")) 
         {
-            AddReward(-1.0f); 
+            AddReward(-2.0f); // Doubled penalty for wall hugging 
         }
     }
     
